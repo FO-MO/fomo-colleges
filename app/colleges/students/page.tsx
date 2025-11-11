@@ -33,6 +33,7 @@ export default function CollegeStudents() {
         setLoading(true);
         const token = localStorage.getItem("fomo_token");
         const data = await fetchData(token, "student-profiles?populate=*");
+        console.log(data);
 
         if (data?.data) {
           const fetchedStudents: Student[] = data.data.map(
@@ -40,9 +41,7 @@ export default function CollegeStudents() {
               const studentData = student as Record<string, unknown>;
               return {
                 id: studentData.id?.toString() || "",
-                documentId:
-                  (studentData.documentId as string) ||
-                  (studentData.studentId as string),
+                documentId: studentData.studentId as string,
                 name: (studentData.name as string) || "Unknown Student",
                 email: (studentData.email as string) || "No email",
                 department:
@@ -59,6 +58,7 @@ export default function CollegeStudents() {
               };
             }
           );
+          console.log("changes", fetchedStudents);
 
           setStudents(fetchedStudents);
         }
