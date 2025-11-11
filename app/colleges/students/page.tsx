@@ -1,20 +1,83 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CollegesSideBar from "@/components/bars/collegesSideBar";
 import Navbar from "@/components/bars/Navbar";
+import { fetchData } from "@/lib/strapi/strapiData";
+import { useRouter } from "next/navigation";
+
+type Student = {
+  id: string;
+  documentId?: string;
+  name: string;
+  email: string;
+  department?: string;
+  year?: string;
+  status?: string;
+  course?: string;
+  graduationYear?: string;
+  skills?: string[];
+  avatarUrl?: string | null;
+};
 
 export default function CollegeStudents() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const students: Array<{
-    id?: string;
-    name?: string;
-    email?: string;
-    department?: string;
-    year?: string;
-    status?: string;
-  }> = [];
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("fomo_token");
+        const data = await fetchData(token, "student-profiles?populate=*");
+
+        if (data?.data) {
+          const fetchedStudents: Student[] = data.data.map(
+            (student: unknown) => {
+              const studentData = student as Record<string, unknown>;
+              return {
+                id: studentData.id?.toString() || "",
+                documentId:
+                  (studentData.documentId as string) ||
+                  (studentData.studentId as string),
+                name: (studentData.name as string) || "Unknown Student",
+                email: (studentData.email as string) || "No email",
+                department:
+                  (studentData.department as string) ||
+                  (studentData.course as string),
+                year:
+                  (studentData.year as string) ||
+                  (studentData.graduationYear as string),
+                status: "Active",
+                course: studentData.course as string,
+                graduationYear: studentData.graduationYear as string,
+                skills: (studentData.skills as string[]) || [],
+                avatarUrl: (studentData.avatarUrl as string) || null,
+              };
+            }
+          );
+
+          setStudents(fetchedStudents);
+        }
+      } catch (error) {
+        console.error("Error fetching students:", error);
+        setStudents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, []);
+
+  const handleProfileClick = (student: Student) => {
+    if (student.documentId) {
+      router.push(`/profile?userId=${student.documentId}`);
+    }
+  };
   React.useEffect(() => {
     if (sidebarOpen) {
       document.body.style.overflow = "hidden";
@@ -153,84 +216,148 @@ export default function CollegeStudents() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">
-              All Students
+              All Students ({students.length})
             </h2>
           </div>
 
-          {students.length === 0 ? (
+          {loading ? (
             <div className="p-10 flex flex-col items-center text-center text-gray-600">
-              <h3 className="mt-6 text-lg font-medium text-gray-900">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mb-4"></div>
+              <p className="text-gray-500">Loading students...</p>
+            </div>
+          ) : students.length === 0 ? (
+            <div className="p-10 flex flex-col items-center text-center text-gray-600">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <svg
+                  className="w-8 h-8 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                </svg>
+              </div>
+              <h3 className="mt-2 text-lg font-medium text-gray-900">
                 No students yet
               </h3>
-              <p className="mt-2 max-w-xl">
+              <p className="mt-2 max-w-xl text-gray-600">
                 Looks like there are no students in your college yet. Invite
                 students or import a list to get started.
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Department
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Year
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {students.map((s, idx) => (
-                    <tr key={s.id || idx}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            {(s.name || "")
+            <div className="divide-y divide-gray-200">
+              {students.map((student) => (
+                <div
+                  key={student.id}
+                  className="p-6 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      {/* Avatar */}
+                      <div className="flex-shrink-0">
+                        {student.avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={student.avatarUrl}
+                            alt={student.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            {student.name
                               .split(" ")
                               .map((n: string) => n[0])
                               .slice(0, 2)
-                              .join("")}
+                              .join("")
+                              .toUpperCase()}
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {s.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {s.email}
-                            </div>
+                        )}
+                      </div>
+
+                      {/* Student Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3 className="text-lg font-semibold text-gray-900 truncate">
+                              {student.name}
+                            </h3>
+                            <p className="text-sm text-gray-600 truncate">
+                              {student.email}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                            {student.department && (
+                              <div className="flex items-center gap-1">
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                <span className="font-medium">
+                                  {student.department}
+                                </span>
+                              </div>
+                            )}
+                            {student.year && (
+                              <div className="flex items-center gap-1">
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{student.year}</span>
+                              </div>
+                            )}
+                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                              {student.status || "Active"}
+                            </span>
                           </div>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {s.department}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {s.year}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                          {s.status || "Active"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-teal-600 hover:text-teal-900">
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+                        {/* Skills */}
+                        {student.skills && student.skills.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {student.skills.slice(0, 4).map((skill, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                            {student.skills.length > 4 && (
+                              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
+                                +{student.skills.length - 4} more
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* View Profile Button */}
+                    <div className="flex-shrink-0 ml-4">
+                      <button
+                        onClick={() => handleProfileClick(student)}
+                        className="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-lg hover:bg-teal-700 transition-colors"
+                      >
+                        View Profile
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
