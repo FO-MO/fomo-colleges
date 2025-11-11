@@ -19,10 +19,10 @@ const items: Item[] = [
   { key: "students", label: "Students", href: "/colleges/students" },
   { key: "analytics", label: "Analytics", href: "/colleges/analytics" },
   { key: "placements", label: "Placements", href: "/colleges/jobs" },
-  { key: "recruiting", label: "Recruiting", href: "/colleges/recruiting" },
-  { key: "reports", label: "Reports", href: "/colleges/reports" },
-  { key: "settings", label: "Settings", href: "/colleges/settings" },
-  { key: "support", label: "Support", href: "#" },
+  // { key: "recruiting", label: "Recruiting", href: "/colleges/recruiting" },
+  // { key: "reports", label: "Reports", href: "/colleges/reports" },
+  // { key: "settings", label: "Settings", href: "/colleges/settings" },
+  // { key: "support", label: "Support", href: "#" },
 ];
 
 function Icon({ name }: { name: string }) {
