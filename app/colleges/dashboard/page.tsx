@@ -13,12 +13,12 @@ import {
 } from "@/components/ui/chart";
 
 const chartData = [
-  { month: "Jan", applications: 450, hires: 32 },
-  { month: "Feb", applications: 520, hires: 40 },
-  { month: "Mar", applications: 380, hires: 28 },
-  { month: "Apr", applications: 680, hires: 48 },
-  { month: "May", applications: 720, hires: 52 },
-  { month: "Jun", applications: 590, hires: 44 },
+  { month: "Jan", applications: 0, hires: 0 },
+  { month: "Feb", applications: 0, hires: 0 },
+  { month: "Mar", applications: 0, hires: 0 },
+  { month: "Apr", applications: 0, hires: 0 },
+  { month: "May", applications: 0, hires: 0 },
+  { month: "Jun", applications: 0, hires: 0 },
 ];
 
 const chartConfig = {
@@ -36,8 +36,8 @@ const dashboardCards = [
   {
     id: 1,
     title: "Total Students",
-    value: "2,847",
-    change: "+12% from last month",
+    value: "0",
+    change: "+0% from last month",
     changeType: "positive",
     iconBg: "bg-blue-100",
     iconColor: "text-blue-600",
@@ -46,8 +46,8 @@ const dashboardCards = [
   {
     id: 2,
     title: "Active Jobs",
-    value: "156",
-    change: "+23 new this week",
+    value: "0",
+    change: "+0 new this week",
     changeType: "positive",
     iconBg: "bg-purple-100",
     iconColor: "text-purple-600",
@@ -56,8 +56,8 @@ const dashboardCards = [
   {
     id: 3,
     title: "Students Hired",
-    value: "93",
-    change: "+15% from last month",
+    value: "0",
+    change: "+0% from last month",
     changeType: "positive",
     iconBg: "bg-green-100",
     iconColor: "text-green-600",
@@ -66,8 +66,8 @@ const dashboardCards = [
   {
     id: 4,
     title: "Upcoming Events",
-    value: "8",
-    change: "Next: Career Fair",
+    value: "0",
+    change: "",
     changeType: "neutral",
     iconBg: "bg-orange-100",
     iconColor: "text-orange-600",
@@ -365,7 +365,7 @@ export default function CollegeDashboard() {
             </ChartContainer>
           </div>
 
-          <div className="bg-white p-6 rounded-xl border border-gray-200">
+          {/* <div className="bg-white p-6 rounded-xl border border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">
               Top Employers
             </h3>
@@ -377,7 +377,7 @@ export default function CollegeDashboard() {
                   </div>
                   <span className="font-medium text-gray-900">Google</span>
                 </div>
-                <span className="text-gray-600">8</span>
+                <span className="text-gray-600">15</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -407,11 +407,11 @@ export default function CollegeDashboard() {
                 <span className="text-gray-600">4</span>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* ACTIVITY CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {actionCards.map((card) => (
             <button
               key={card.id}
@@ -444,7 +444,7 @@ export default function CollegeDashboard() {
               </div>
             </button>
           ))}
-        </div>
+        </div> */}
       </main>
     </div>
   );
