@@ -5,16 +5,61 @@ import CollegesSideBar from "@/components/bars/collegesSideBar";
 import Navbar from "@/components/bars/Navbar";
 import Link from "next/link";
 
+type JobPosting = {
+  id: number;
+  title: string;
+  company: string;
+  description: string;
+  location: string;
+  salary: string;
+  applications: number;
+  status: "Active" | "Closed" | "Draft";
+  companyLogo: string;
+  logoColor: string;
+};
+
 export default function CollegeJobs() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const pathname = "/colleges/jobs";
 
-  const tabs = [
-    { label: "Overview", href: "/colleges/dashboard" },
-    { label: "Students", href: "/colleges/students" },
-    { label: "Jobs", href: "/colleges/jobs" },
-    { label: "Events", href: "/colleges/events" },
-    { label: "Analytics", href: "/colleges/analytics" },
+  // Job Postings Array
+  const jobPostings: JobPosting[] = [
+    // {
+    //   id: 1,
+    //   title: "Software Engineer",
+    //   company: "Google",
+    //   companyLogo: "G",
+    //   logoColor: "bg-yellow-500",
+    //   description:
+    //     "Looking for talented software engineers to join our team...",
+    //   location: "Mountain View, CA",
+    //   salary: "$120K - $180K",
+    //   applications: 42,
+    //   status: "Active",
+    // },
+    // {
+    //   id: 2,
+    //   title: "Product Manager",
+    //   company: "Microsoft",
+    //   companyLogo: "M",
+    //   logoColor: "bg-blue-600",
+    //   description: "Join our product team to build innovative solutions...",
+    //   location: "Seattle, WA",
+    //   salary: "$130K - $160K",
+    //   applications: 28,
+    //   status: "Active"
+    // },
+    // {
+    //   id: 3,
+    //   title: "Data Scientist",
+    //   company: "Amazon",
+    //   companyLogo: "A",
+    //   logoColor: "bg-orange-500",
+    //   description: "Analyze complex data to drive business decisions...",
+    //   location: "Austin, TX",
+    //   salary: "$110K - $150K",
+    //   applications: 35,
+    //   status: "Closed"
+    // }
   ];
 
   React.useEffect(() => {
@@ -95,7 +140,7 @@ export default function CollegeJobs() {
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Job Postings
+                Placements
               </h1>
               <p className="text-sm sm:text-base text-gray-600">
                 Manage Job Opportunities
@@ -131,71 +176,70 @@ export default function CollegeJobs() {
         </div> */}
 
         {/* Job Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">G</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Software Engineer
-                  </h3>
-                  <p className="text-sm text-gray-600">Google</p>
-                </div>
-              </div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                Active
-              </span>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Looking for talented software engineers to join our team...
-            </p>
-            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-              <span>📍 Mountain View, CA</span>
-              <span>💰 $120K - $180K</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">42 applications</span>
-              <button className="text-teal-600 hover:text-teal-700 font-medium">
-                View Details →
-              </button>
+        {jobPostings.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                No Job Postings
+              </h3>
+              <p className="text-gray-600 mb-6">
+                There are currently no job postings available. Check back later
+                for new opportunities.
+              </p>
             </div>
           </div>
-
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">M</span>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {jobPostings.map((job) => (
+              <div
+                key={job.id}
+                className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-12 h-12 ${job.logoColor} rounded-lg flex items-center justify-center`}
+                    >
+                      <span className="text-white font-bold text-xl">
+                        {job.companyLogo}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {job.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">{job.company}</p>
+                    </div>
+                  </div>
+                  <span
+                    className={`px-3 py-1 text-xs font-medium rounded-full ${
+                      job.status === "Active"
+                        ? "bg-green-100 text-green-700"
+                        : job.status === "Closed"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {job.status}
+                  </span>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Product Manager
-                  </h3>
-                  <p className="text-sm text-gray-600">Microsoft</p>
+                <p className="text-gray-600 mb-4">{job.description}</p>
+                <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                  <span>📍 {job.location}</span>
+                  <span>💰 {job.salary}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    {job.applications} applications
+                  </span>
+                  <button className="text-teal-600 hover:text-teal-700 font-medium">
+                    View Details →
+                  </button>
                 </div>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                Active
-              </span>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Join our product team to build innovative solutions...
-            </p>
-            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-              <span>📍 Seattle, WA</span>
-              <span>💰 $130K - $160K</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">28 applications</span>
-              <button className="text-teal-600 hover:text-teal-700 font-medium">
-                View Details →
-              </button>
-            </div>
+            ))}
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

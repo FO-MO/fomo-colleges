@@ -309,7 +309,7 @@ export default function CollegeDashboard() {
         </div>
 
         {/* CHART SETUP + TOP EMPLOYERS */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1  lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-200">
             <div className="flex items-center gap-2 mb-6">
               <svg
@@ -365,49 +365,62 @@ export default function CollegeDashboard() {
             </ChartContainer>
           </div>
 
-          {/* <div className="bg-white p-6 rounded-xl border border-gray-200">
+          <div className="bg-white p-6 rounded-xl border border-gray-200">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">
               Top Employers
             </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+            <div className="space-y-8">
+              <div className="flex items-center bg-[whitesmoke] p-2 justify-between">
+                <div className="flex items-center opacity-0 gap-3">
+                  <div className="w-8 h-8 bg-yellow-500 opacity-0 rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">G</span>
                   </div>
-                  <span className="font-medium text-gray-900">Google</span>
+                  <span
+                    className="font-medium text-gray-900"
+                    style={{ display: "none" }}
+                  >
+                    Google
+                  </span>
                 </div>
-                <span className="text-gray-600">15</span>
+                <span className="text-gray-600 opacity-0">15</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center bg-[whitesmoke] p-2  justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-600 rounded-full opacity-0 flex items-center justify-center">
                     <span className="text-white text-xs font-bold">M</span>
                   </div>
-                  <span className="font-medium text-gray-900">Microsoft</span>
+                  <span className="font-medium text-gray-900 opacity-0">
+                    Microsoft
+                  </span>
                 </div>
-                <span className="text-gray-600">6</span>
+                <span className="text-gray-600 opacity-0">6</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center bg-[whitesmoke] p-2 justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-orange-500 opacity-0 rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">A</span>
                   </div>
-                  <span className="font-medium text-gray-900">Amazon</span>
+                  <span className="font-medium opacity-0 text-gray-900">
+                    Amazon
+                  </span>
                 </div>
-                <span className="text-gray-600">5</span>
+                <span className="text-gray-600 opacity-0">5</span>
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center bg-[whitesmoke] p-2 justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-700 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-blue-700 opacity-0 rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">M</span>
                   </div>
-                  <span className="font-medium text-gray-900">Meta</span>
+                  <span className="font-medium opacity-0 text-gray-900">
+                    Meta
+                  </span>
                 </div>
-                <span className="text-gray-600">4</span>
+                <span className="text-gray-600" style={{ display: "none" }}>
+                  4
+                </span>
               </div>
             </div>
-          </div> */}
+          </div>
         </div>
 
         {/* ACTIVITY CARDS */}

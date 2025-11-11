@@ -24,6 +24,7 @@ export default function CollegeStudents() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const [collegeName, setCollegeName] = useState<string>("");
 
   const router = useRouter();
 
@@ -32,7 +33,39 @@ export default function CollegeStudents() {
       try {
         setLoading(true);
         const token = localStorage.getItem("fomo_token");
-        const data = await fetchData(token, "student-profiles?populate=*");
+
+        if (!token) {
+          console.warn("No authentication token found");
+          setStudents([]);
+          return;
+        }
+
+        // First fetch the college profile to get the college name
+        const collegeData = await fetchData(
+          token,
+          "college-profiles?populate=*"
+        );
+
+        let currentCollegeName = "";
+        if (collegeData?.data && collegeData.data.length > 0) {
+          // Assuming the first college profile belongs to the logged-in user
+          currentCollegeName = collegeData.data[0].collegeName;
+          setCollegeName(currentCollegeName);
+        }
+
+        if (!currentCollegeName) {
+          console.warn("No college profile found");
+          setStudents([]);
+          return;
+        }
+
+        // Filter student profiles by college name
+        const data = await fetchData(
+          token,
+          `student-profiles?populate=*&filters[college][$eq]=${encodeURIComponent(
+            currentCollegeName
+          )}`
+        );
         console.log(data);
 
         if (data?.data) {
@@ -227,17 +260,6 @@ export default function CollegeStudents() {
             </div>
           ) : students.length === 0 ? (
             <div className="p-10 flex flex-col items-center text-center text-gray-600">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <svg
-                  className="w-8 h-8 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
-              </div>
               <h3 className="mt-2 text-lg font-medium text-gray-900">
                 No students yet
               </h3>

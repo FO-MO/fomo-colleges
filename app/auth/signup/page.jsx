@@ -30,7 +30,7 @@ export default function Signup() {
           localStorage.setItem("fomo_user", JSON.stringify(result.user));
         } catch {}
         setSuccess(true);
-        window.location.href = "/auth/login";
+        window.location.href = "/auth/college-profile";
       } else {
         // Strapi may require email confirmation depending on settings
         setSuccess(true);
