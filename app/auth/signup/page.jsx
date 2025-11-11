@@ -30,7 +30,7 @@ export default function Signup() {
           localStorage.setItem("fomo_user", JSON.stringify(result.user));
         } catch {}
         setSuccess(true);
-        window.location.href = "/auth/setup-profile";
+        window.location.href = "/auth/login";
       } else {
         // Strapi may require email confirmation depending on settings
         setSuccess(true);

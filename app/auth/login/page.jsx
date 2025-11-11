@@ -27,7 +27,7 @@ export default function Login() {
           localStorage.setItem("fomo_user", JSON.stringify(result.user));
         } catch {}
         // force full reload to ensure server components pick up cookies if needed
-        window.location.href = "/students";
+        window.location.href = "/colleges/dashboard";
       } else {
         setError("Unexpected login response");
         console.error("Unexpected login response", result);
