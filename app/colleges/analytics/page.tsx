@@ -48,6 +48,15 @@ export default function CollegeAnalytics() {
     { label: "Analytics", href: "/colleges/analytics" },
   ];
 
+  // Recent activities data (replace with real data when available)
+  const recentActivities: Array<{
+    title: string;
+    subtitle?: string;
+    time: string;
+    bg: string;
+    icon: any;
+  }> = [];
+
   React.useEffect(() => {
     if (sidebarOpen) {
       document.body.style.overflow = "hidden";
@@ -325,120 +334,30 @@ export default function CollegeAnalytics() {
             Recent Activity
           </h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-blue-600"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">New job posted</p>
-                  <p className="text-sm text-gray-500">Google</p>
-                </div>
+            {recentActivities.length === 0 ? (
+              <div className="p-6 flex flex-col items-center text-center text-gray-600">
+                <h4 className="text-lg font-medium text-gray-900">No activities yet</h4>
+                <p className="mt-2">There are no recent activities to show.</p>
               </div>
-              <span className="text-sm text-gray-400">2 hours ago</span>
-            </div>
-
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-yellow-600"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                  </svg>
+            ) : (
+              recentActivities.map((act, idx) => (
+                <div
+                  key={idx}
+                  className={`flex items-center justify-between py-3 ${idx !== recentActivities.length - 1 ? 'border-b border-gray-100' : ''}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 ${act.bg} rounded-lg flex items-center justify-center`}>
+                      {act.icon}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{act.title}</p>
+                      <p className="text-sm text-gray-500">{act.subtitle}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-400">{act.time}</span>
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900">
-                    Student application
-                  </p>
-                  <p className="text-sm text-gray-500">Aarav Sharma</p>
-                </div>
-              </div>
-              <span className="text-sm text-gray-400">4 hours ago</span>
-            </div>
-
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-purple-600"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">Event created</p>
-                  <p className="text-sm text-gray-500">Tech Career Fair</p>
-                </div>
-              </div>
-              <span className="text-sm text-gray-400">1 day ago</span>
-            </div>
-
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-green-600"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">
-                    Company registered
-                  </p>
-                  <p className="text-sm text-gray-500">Microsoft</p>
-                </div>
-              </div>
-              <span className="text-sm text-gray-400">2 days ago</span>
-            </div>
-
-            <div className="flex items-center justify-between py-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center">
-                  <svg
-                    className="w-5 h-5 text-teal-600"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">Student hired</p>
-                  <p className="text-sm text-gray-500">Priya Patel</p>
-                </div>
-              </div>
-              <span className="text-sm text-gray-400">3 days ago</span>
-            </div>
+              ))
+            )}
           </div>
         </div>
       </main>

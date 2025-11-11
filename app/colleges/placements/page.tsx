@@ -17,6 +17,18 @@ export default function CollegeJobs() {
     { label: "Analytics", href: "/colleges/analytics" },
   ];
 
+  // Job postings data (replace with real data when available)
+  const jobPostings: Array<{
+    id?: string;
+    title: string;
+    company?: string;
+    location?: string;
+    salary?: string;
+    status?: string;
+    applications?: number;
+    description?: string;
+  }> = [];
+
   React.useEffect(() => {
     if (sidebarOpen) {
       document.body.style.overflow = "hidden";
@@ -132,69 +144,38 @@ export default function CollegeJobs() {
 
         {/* Job Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">G</span>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Software Engineer
-                  </h3>
-                  <p className="text-sm text-gray-600">Google</p>
-                </div>
-              </div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                Active
-              </span>
+          {jobPostings.length === 0 ? (
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm col-span-full flex flex-col items-center text-center">
+              <h3 className="text-lg font-semibold text-gray-900">No job postings yet</h3>
+              <p className="text-sm text-gray-600 mt-2">Create a job posting to attract applicants.</p>
             </div>
-            <p className="text-gray-600 mb-4">
-              Looking for talented software engineers to join our team...
-            </p>
-            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-              <span>📍 Mountain View, CA</span>
-              <span>💰 $120K - $180K</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">42 applications</span>
-              <button className="text-teal-600 hover:text-teal-700 font-medium">
-                View Details →
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">M</span>
+          ) : (
+            jobPostings.map((job, idx) => (
+              <div key={job.id || idx} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gray-300 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-bold text-xl">{(job.company || "")[0] || "J"}</span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{job.title}</h3>
+                      <p className="text-sm text-gray-600">{job.company}</p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">{job.status || 'Active'}</span>
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Product Manager
-                  </h3>
-                  <p className="text-sm text-gray-600">Microsoft</p>
+                <p className="text-gray-600 mb-4">{job.description}</p>
+                <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                  <span>📍 {job.location}</span>
+                  <span>💰 {job.salary}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">{job.applications ?? 0} applications</span>
+                  <button className="text-teal-600 hover:text-teal-700 font-medium">View Details →</button>
                 </div>
               </div>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                Active
-              </span>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Join our product team to build innovative solutions...
-            </p>
-            <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-              <span>📍 Seattle, WA</span>
-              <span>💰 $130K - $160K</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">28 applications</span>
-              <button className="text-teal-600 hover:text-teal-700 font-medium">
-                View Details →
-              </button>
-            </div>
-          </div>
+            ))
+          )}
         </div>
       </main>
     </div>
