@@ -1,0 +1,69 @@
+{
+  "kind": "collectionType",
+  "collectionName": "student_profiles",
+  "info": {
+    "singularName": "student-profile",
+    "pluralName": "student-profiles",
+    "displayName": "Student Profile",
+    "description": "Student profile information linked to user accounts"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "studentId": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email"
+    },
+    "about": {
+      "type": "text"
+    },
+    "college": {
+      "type": "string"
+    },
+    "course": {
+      "type": "string"
+    },
+    "graduationYear": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "skills": {
+      "type": "json"
+    },
+    "interests": {
+      "type": "json"
+    },
+    "followers": {
+      "type": "integer",
+      "default": 0
+    },
+    "following": {
+      "type": "integer",
+      "default": 0
+    },
+    "profilePic": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "backgroundImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}
