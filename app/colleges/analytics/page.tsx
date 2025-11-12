@@ -110,7 +110,7 @@ export default function CollegeAnalytics() {
     subtitle?: string
     time: string
     bg: string
-    icon: any
+    icon: string
   }> = []
 
   React.useEffect(() => {
