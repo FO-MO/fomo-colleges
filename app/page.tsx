@@ -19,6 +19,7 @@ console.log('User from localStorage:', parsedUser)
 export default function Home() {
   return (
     <>
+      {/* HII */}
       <TopBar theme='home' user={rawUser ? parsedUser : null} />
       <Hero1 />
       <Hero2 />
