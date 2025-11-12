@@ -54,9 +54,7 @@ export default function CollegeProfileSetup() {
       }
 
       // Use axios to send POST request to Strapi
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL ||
-        "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
       const response = await axios.post(
         `${backendUrl}/api/college-profiles`,
@@ -68,6 +66,8 @@ export default function CollegeProfileSetup() {
             location: profile.location,
             numberOfStudents: profile.numberOfStudents,
             establishmentDate: profile.establishmentDate,
+            userId: JSON.parse(localStorage.getItem("fomo_user") || "{}")
+              .documentId,
           },
         },
         {
@@ -78,8 +78,13 @@ export default function CollegeProfileSetup() {
         }
       );
 
-      // If successful, navigate to college dashboard
+      // If successful, save college name and navigate to college dashboard
       if (response.status === 200 || response.status === 201) {
+        try {
+          localStorage.setItem("collegeName", profile.collegeName);
+        } catch (e) {
+          console.error("Failed to save college name to localStorage:", e);
+        }
         router.push("/colleges/dashboard");
       }
     } catch (error) {

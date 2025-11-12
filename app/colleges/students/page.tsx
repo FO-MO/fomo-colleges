@@ -49,8 +49,9 @@ export default function CollegeStudents() {
         let currentCollegeName = "";
         if (collegeData?.data && collegeData.data.length > 0) {
           // Assuming the first college profile belongs to the logged-in user
-          currentCollegeName = collegeData.data[0].collegeName;
+          currentCollegeName = localStorage.getItem("collegeName") || "";
           setCollegeName(currentCollegeName);
+          console.log("Current college name:", currentCollegeName);
         }
 
         if (!currentCollegeName) {
@@ -174,7 +175,11 @@ export default function CollegeStudents() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <img src="/icons/students.svg" alt="Students" className="w-6 h-6" />
+              <img
+                src="/icons/students.svg"
+                alt="Students"
+                className="w-6 h-6"
+              />
             </div>
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
