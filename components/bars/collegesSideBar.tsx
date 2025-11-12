@@ -19,6 +19,7 @@ const items: Item[] = [
   { key: "students", label: "Students", href: "/colleges/students" },
   { key: "analytics", label: "Analytics", href: "/colleges/analytics" },
   { key: "placements", label: "Placements", href: "/colleges/placements" },
+  { key: "profile", label: "Profile", href: "/colleges/profile" },
 ];
 
 function Icon({ name }: { name: string }) {
@@ -48,11 +49,7 @@ function Icon({ name }: { name: string }) {
       );
     case "students":
       return (
-        <img
-          src="/icons/students.svg"
-          alt="Students"
-          className="w-5 h-5"
-        />
+        <img src="/icons/students.svg" alt="Students" className="w-5 h-5" />
       );
     case "analytics":
       return (
@@ -153,6 +150,22 @@ function Icon({ name }: { name: string }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      );
+    case "profile":
+      return (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
           />
         </svg>
       );
