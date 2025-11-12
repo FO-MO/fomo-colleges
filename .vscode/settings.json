@@ -249,5 +249,11 @@
   "[cpp]": {
     "editor.defaultFormatter": "ms-vscode.cpptools",
     "editor.formatOnSave": true
-  }
+  },
+  
+  // Git merge conflict resolution settings
+  "merge-conflict.autoNavigateNextConflict.enabled": true,
+  "git.mergeEditor": true,
+  "diffEditor.ignoreTrimWhitespace": false,
+  "merge-conflict.decorators.enabled": true
 }
