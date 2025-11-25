@@ -24,7 +24,6 @@ export default function CollegeStudents() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const [collegeName, setCollegeName] = useState<string>("");
 
   const router = useRouter();
 
@@ -41,16 +40,19 @@ export default function CollegeStudents() {
         }
 
         // First fetch the college profile to get the college name
-        const collegeData = await fetchData(
+        const collegeData = (await fetchData(
           token,
           "college-profiles?populate=*"
-        );
+        )) as { data?: unknown[] } | null;
 
         let currentCollegeName = "";
-        if (collegeData?.data && collegeData.data.length > 0) {
+        if (
+          collegeData?.data &&
+          Array.isArray(collegeData.data) &&
+          collegeData.data.length > 0
+        ) {
           // Assuming the first college profile belongs to the logged-in user
           currentCollegeName = localStorage.getItem("collegeName") || "";
-          setCollegeName(currentCollegeName);
           console.log("Current college name:", currentCollegeName);
         }
 
@@ -61,15 +63,15 @@ export default function CollegeStudents() {
         }
 
         // Filter student profiles by college name
-        const data = await fetchData(
+        const data = (await fetchData(
           token,
           `student-profiles?populate=*&filters[college][$eq]=${encodeURIComponent(
             currentCollegeName
           )}`
-        );
+        )) as { data?: unknown[] } | null;
         console.log(data);
 
-        if (data?.data) {
+        if (data?.data && Array.isArray(data.data)) {
           const fetchedStudents: Student[] = data.data.map(
             (student: unknown) => {
               const studentData = student as Record<string, unknown>;
