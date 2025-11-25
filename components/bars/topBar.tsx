@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 type Props = {
   title?: string;
@@ -27,11 +27,21 @@ export default function TopBar({
   theme = "white",
   user = null,
 }: Props) {
+  const [open, setOpen] = useState(false);
+
   // TODO: replace with real auth context/state
   const mockUser = user;
   const isAuthenticated = Boolean(mockUser?.loggedIn);
   const authenticatedUser: User | null =
     isAuthenticated && mockUser ? mockUser : null;
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   const isHomeTheme = theme === "home";
   const navbarClasses = isHomeTheme ? "" : "backdrop-blur-md";
@@ -46,6 +56,11 @@ export default function TopBar({
         borderBottom: "1px solid rgba(255,255,255,0.05)",
       };
 
+  const navLinkBase = "font-semibold transition-all duration-200";
+  const navLinkColor =
+    theme === "black"
+      ? "text-black hover:text-[#0f4f4a] hover:-translate-y-0.5"
+      : "text-white/95 hover:text-[#d6ff3a] hover:-translate-y-0.5";
   const greetingColor = theme === "black" ? "text-gray-900" : "text-white";
 
   return (
