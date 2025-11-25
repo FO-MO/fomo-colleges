@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import CollegesSideBar from "@/components/bars/collegesSideBar";
 import Navbar from "@/components/bars/Navbar";
@@ -34,11 +34,7 @@ export default function CollegeProfilePage() {
     null
   );
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
       const token = getAuthToken();
@@ -61,11 +57,15 @@ export default function CollegeProfilePage() {
         router.push("/auth/college-profile");
       }
     } catch (error) {
-      console.error("Error loading college profile:", error);
+      console.error("Failed to load profile:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const handleInputChange = (
     e: React.ChangeEvent<

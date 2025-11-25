@@ -4,7 +4,7 @@ type Props = {
   title: string;
   description: string;
   status: string;
-  tags: string[];
+  tags?: string[];
 };
 
 export default function ProfileProjectCard({

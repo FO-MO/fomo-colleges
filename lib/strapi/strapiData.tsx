@@ -1,21 +1,33 @@
 // Minimal Strapi auth helper for client-side usage
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export async function fetchData(
+export interface StrapiResponse<T = unknown> {
+  data: T;
+  meta?: {
+    pagination?: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
+  };
+}
+
+export async function fetchData<T = unknown>(
   token: string | null,
   endpoint: string
-): Promise<any> {
+): Promise<StrapiResponse<T>> {
   const res = await fetch(`${BACKEND_URL}/api/${endpoint}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.json();
 }
 
-export async function postData(
+export async function postData<T = unknown>(
   token: string | null,
   endpoint: string,
-  data: any
-): Promise<any> {
+  data: Record<string, unknown>
+): Promise<StrapiResponse<T>> {
   const res = await fetch(`${BACKEND_URL}/api/${endpoint}`, {
     method: "POST",
     headers: {
@@ -27,11 +39,11 @@ export async function postData(
   return res.json();
 }
 
-export async function putData(
+export async function putData<T = unknown>(
   token: string | null,
   endpoint: string,
-  data: any
-): Promise<any> {
+  data: Record<string, unknown>
+): Promise<StrapiResponse<T>> {
   const res = await fetch(`${BACKEND_URL}/api/${endpoint}`, {
     method: "PUT",
     headers: {

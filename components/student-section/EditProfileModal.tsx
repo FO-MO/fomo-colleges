@@ -4,9 +4,7 @@ import { X, Check } from "lucide-react";
 import { useState } from "react";
 import { getAuthToken } from "@/lib/strapi/auth";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 // Predefined options
 const AVAILABLE_SKILLS = [
@@ -83,7 +81,7 @@ export default function EditProfileModal({
   onSave,
 }: EditProfileModalProps) {
   const [name, setName] = useState(currentData.name);
-  const [email, setEmail] = useState(currentData.email);
+  const [email] = useState(currentData.email);
   const [institution, setInstitution] = useState(currentData.institution || "");
   const [major, setMajor] = useState(currentData.major || "");
   const [graduationYear, setGraduationYear] = useState(
@@ -129,10 +127,13 @@ export default function EditProfileModal({
       try {
         const raw = localStorage.getItem("fomo_user");
         if (raw) {
-          const parsed = JSON.parse(raw as string) as any;
+          const parsed = JSON.parse(raw as string) as {
+            documentId?: string;
+            id?: string;
+          };
           studentId = parsed?.documentId ?? parsed?.id ?? null;
         }
-      } catch (err) {
+      } catch {
         // ignore parse errors
       }
 
@@ -155,7 +156,16 @@ export default function EditProfileModal({
       }
 
       // Build payload for Strapi (do NOT include email to prevent changes)
-      const payload: any = {
+      const payload: {
+        name: string;
+        about: string;
+        college: string;
+        course: string;
+        graduationYear: string;
+        location: string;
+        skills: string[];
+        interests: string[];
+      } = {
         name,
         about: bio,
         college: institution,

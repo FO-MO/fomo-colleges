@@ -4,7 +4,7 @@ type Props = {
   name: string;
   description: string;
   tags: string[];
-  badge?: string;
+  badge?: string | null;
 };
 
 export default function ProfileClubCard({

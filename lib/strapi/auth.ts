@@ -1,10 +1,30 @@
 // Minimal Strapi auth helper for client-side usage
 const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+export interface StrapiAuthResponse {
+  jwt?: string;
+  user?: {
+    id: number;
+    username: string;
+    email: string;
+    documentId?: string;
+  };
+  error?: {
+    message: string;
+  };
+}
+
+export interface StrapiUser {
+  id: number;
+  username: string;
+  email: string;
+  documentId?: string;
+}
+
 export async function strapiLogin(
   identifier: string,
   password: string
-): Promise<any> {
+): Promise<StrapiAuthResponse> {
   const res = await fetch(`${STRAPI_URL}/api/auth/local`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -17,7 +37,7 @@ export async function strapiRegister(
   username: string,
   email: string,
   password: string
-): Promise<any> {
+): Promise<StrapiAuthResponse> {
   const res = await fetch(`${STRAPI_URL}/api/auth/local/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -51,7 +71,7 @@ export function getAuthToken(): string | null {
   return match ? match[2] : null;
 }
 
-export async function fetchMe(token: string): Promise<any> {
+export async function fetchMe(token: string): Promise<StrapiUser> {
   const res = await fetch(`${STRAPI_URL}/api/users/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });

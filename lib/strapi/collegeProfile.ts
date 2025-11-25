@@ -1,6 +1,5 @@
 // Strapi college profile helper functions
-const STRAPI_URL =
-  process.env.BACKEND_URL || "https://tbs9k5m4-1337.inc1.devtunnels.ms";
+const STRAPI_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export interface CollegeProfile {
   documentId?: string;
