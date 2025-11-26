@@ -38,4 +38,12 @@ export const KERALA_COLLEGES = [
   "Ilahia College of Engineering and Technology",
   "Federal Institute of Science and Technology (FISAT)",
   "Albertian Institute of Science and Technology",
+  "RAJIV GANDHI INSTITUTE OF TECHNOLOGY, KOTTAYAM",
+  "Saintgits College of Engineering (Autonomous), Kottayam",
+  "TOMS College of Engineering And Polytechnic",
+  "St. Joseph's College of Engineering and Technology, Palai (Autonomous)",
+  "Mangalam College of Engineering",
+  "Amal Jyothi College of Engineering Autonomous",
+  "College of Engineering Kidangoor",
+  "GIT Engineering College - Kangazha Kottayam",
 ];

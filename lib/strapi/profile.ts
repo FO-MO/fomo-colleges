@@ -436,6 +436,12 @@ export async function getStudentProfile_2(
     const profile = json?.data?.[0];
     console.log("Fetched student profile:", profile);
 
+    // If no profile found, return null
+    if (!profile) {
+      console.log("No student profile found for studentId:", studentId);
+      return null;
+    }
+
     const data: StudentProfile = {
       studentId: profile.studentId || studentId,
       name: profile.user?.username || "User",
