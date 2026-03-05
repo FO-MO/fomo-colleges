@@ -18,12 +18,16 @@ type Student = {
   graduationYear?: string;
   skills?: string[];
   avatarUrl?: string | null;
+  cgpa?: number | null;
 };
 
 export default function CollegeStudents() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingCGPA, setEditingCGPA] = useState<string | null>(null);
+  const [cgpaValue, setCgpaValue] = useState<string>("");
+  const [updating, setUpdating] = useState(false);
 
   const router = useRouter();
 
@@ -36,6 +40,7 @@ export default function CollegeStudents() {
         if (!token) {
           console.warn("No authentication token found");
           setStudents([]);
+          setLoading(false);
           return;
         }
 
@@ -91,6 +96,7 @@ export default function CollegeStudents() {
                 graduationYear: studentData.graduationYear as string,
                 skills: (studentData.skills as string[]) || [],
                 avatarUrl: (studentData.avatarUrl as string) || null,
+                cgpa: (studentData.cgpa as number) || null,
               };
             }
           );
@@ -112,6 +118,77 @@ export default function CollegeStudents() {
   const handleProfileClick = (student: Student) => {
     if (student.documentId) {
       router.push(`/profile?userId=${student.documentId}`);
+    }
+  };
+
+  const handleEditCGPA = (studentId: string, currentCGPA: number | null) => {
+    setEditingCGPA(studentId);
+    setCgpaValue(currentCGPA?.toString() || "");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCGPA(null);
+    setCgpaValue("");
+  };
+
+  const handleSaveCGPA = async (studentId: string, documentId?: string) => {
+    const cgpa = parseFloat(cgpaValue);
+    
+    // Validate CGPA
+    if (isNaN(cgpa) || cgpa < 0 || cgpa > 10) {
+      alert("Please enter a valid CGPA between 0 and 10");
+      return;
+    }
+
+    setUpdating(true);
+
+    try {
+      const token = localStorage.getItem("fomo_token");
+      
+      if (!token || !documentId) {
+        console.warn("No token or documentId - updating locally only");
+        // Update local state
+        setStudents((prev) =>
+          prev.map((s) => (s.id === studentId ? { ...s, cgpa } : s))
+        );
+        setEditingCGPA(null);
+        setUpdating(false);
+        return;
+      }
+
+      // Send update to backend
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}/api/student-profiles/${documentId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            data: {
+              cgpa: cgpa,
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update CGPA");
+      }
+
+      // Update local state
+      setStudents((prev) =>
+        prev.map((s) => (s.id === studentId ? { ...s, cgpa } : s))
+      );
+
+      setEditingCGPA(null);
+      console.log("CGPA updated successfully");
+    } catch (error) {
+      console.error("Error updating CGPA:", error);
+      alert("Failed to update CGPA. Please try again.");
+    } finally {
+      setUpdating(false);
     }
   };
   React.useEffect(() => {
@@ -364,6 +441,78 @@ export default function CollegeStudents() {
                             )}
                           </div>
                         )}
+
+                        {/* CGPA Section */}
+                        <div className="mt-3 flex items-center gap-2">
+                          {editingCGPA === student.id ? (
+                            <>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="10"
+                                value={cgpaValue}
+                                onChange={(e) => setCgpaValue(e.target.value)}
+                                className="w-20 px-2 py-1 border border-teal-500 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                placeholder="0.00"
+                                disabled={updating}
+                              />
+                              <button
+                                onClick={() => handleSaveCGPA(student.id, student.documentId)}
+                                disabled={updating}
+                                className="px-3 py-1 bg-teal-600 text-white text-xs font-medium rounded-md hover:bg-teal-700 transition-colors disabled:opacity-50"
+                              >
+                                {updating ? "Saving..." : "Save"}
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                disabled={updating}
+                                className="px-3 py-1 bg-gray-300 text-gray-700 text-xs font-medium rounded-md hover:bg-gray-400 transition-colors disabled:opacity-50"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-md">
+                                <svg
+                                  className="w-4 h-4 text-blue-600"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                <span className="text-sm font-semibold text-blue-900">
+                                  CGPA: {student.cgpa !== null && student.cgpa !== undefined ? student.cgpa.toFixed(2) : "N/A"}
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => handleEditCGPA(student.id, student.cgpa || null)}
+                                className="p-1.5 text-gray-500 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-colors"
+                                title="Edit CGPA"
+                              >
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth={2}
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                  />
+                                </svg>
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
 
