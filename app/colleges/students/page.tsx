@@ -3,8 +3,14 @@
 import React, { useState, useEffect } from "react";
 import CollegesSideBar from "@/components/bars/collegesSideBar";
 import Navbar from "@/components/bars/Navbar";
-import { fetchData } from "@/lib/strapi/strapiData";
 import { useRouter } from "next/navigation";
+import { getCurrentAuthUser } from "@/lib/supabase/auth";
+import {
+  getCollegeProfileById,
+  getStudentsByCollegeName,
+  StudentListRow,
+  updateStudentCgpa,
+} from "@/lib/supabase/profile";
 
 type Student = {
   id: string;
@@ -35,75 +41,40 @@ export default function CollegeStudents() {
     const fetchStudents = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("fomo_token");
+        const currentUser = await getCurrentAuthUser();
 
-        if (!token) {
-          console.warn("No authentication token found");
+        if (!currentUser) {
+          console.warn("No authenticated user found");
           setStudents([]);
-          setLoading(false);
+          router.push("/auth/login");
           return;
         }
 
-        // First fetch the college profile to get the college name
-        const collegeData = (await fetchData(
-          token,
-          "college-profiles?populate=*"
-        )) as { data?: unknown[] } | null;
-
-        let currentCollegeName = "";
-        if (
-          collegeData?.data &&
-          Array.isArray(collegeData.data) &&
-          collegeData.data.length > 0
-        ) {
-          // Assuming the first college profile belongs to the logged-in user
-          currentCollegeName = localStorage.getItem("collegeName") || "";
-          console.log("Current college name:", currentCollegeName);
-        }
+        const collegeProfile = await getCollegeProfileById(currentUser.id);
+        const currentCollegeName = collegeProfile?.collegeName || "";
 
         if (!currentCollegeName) {
-          console.warn("No college profile found");
+          console.warn("No college profile found for current user");
           setStudents([]);
+          router.push("/auth/college-profile");
           return;
         }
-
-        // Filter student profiles by college name
-        const data = (await fetchData(
-          token,
-          `student-profiles?populate=*&filters[college][$eq]=${encodeURIComponent(
-            currentCollegeName
-          )}`
-        )) as { data?: unknown[] } | null;
-        console.log(data);
-
-        if (data?.data && Array.isArray(data.data)) {
-          const fetchedStudents: Student[] = data.data.map(
-            (student: unknown) => {
-              const studentData = student as Record<string, unknown>;
-              return {
-                id: studentData.id?.toString() || "",
-                documentId: studentData.studentId as string,
-                name: (studentData.name as string) || "Unknown Student",
-                email: (studentData.email as string) || "No email",
-                department:
-                  (studentData.department as string) ||
-                  (studentData.course as string),
-                year:
-                  (studentData.year as string) ||
-                  (studentData.graduationYear as string),
-                status: "Active",
-                course: studentData.course as string,
-                graduationYear: studentData.graduationYear as string,
-                skills: (studentData.skills as string[]) || [],
-                avatarUrl: (studentData.avatarUrl as string) || null,
-                cgpa: (studentData.cgpa as number) || null,
-              };
-            }
-          );
-          console.log("changes", fetchedStudents);
-
-          setStudents(fetchedStudents);
-        }
+        const rows = await getStudentsByCollegeName(currentCollegeName);
+        const fetchedStudents: Student[] = rows.map((student: StudentListRow) => ({
+          id: student.id?.toString() || "",
+          documentId: student.user_id || "",
+          name: student.name || "Unknown Student",
+          email: student.email || "No email",
+          department: student.course || "",
+          year: student.graduation_year?.toString?.() || "",
+          status: "Active",
+          course: student.course || "",
+          graduationYear: student.graduation_year?.toString?.() || "",
+          skills: Array.isArray(student.skills) ? student.skills : [],
+          avatarUrl: null,
+          cgpa: student.cgpa ?? null,
+        }));
+        setStudents(fetchedStudents);
       } catch (error) {
         console.error("Error fetching students:", error);
         setStudents([]);
@@ -113,7 +84,7 @@ export default function CollegeStudents() {
     };
 
     fetchStudents();
-  }, []);
+  }, [router]);
 
   const handleProfileClick = (student: Student) => {
     if (student.documentId) {
@@ -131,7 +102,7 @@ export default function CollegeStudents() {
     setCgpaValue("");
   };
 
-  const handleSaveCGPA = async (studentId: string, documentId?: string) => {
+  const handleSaveCGPA = async (studentId: string) => {
     const cgpa = parseFloat(cgpaValue);
     
     // Validate CGPA
@@ -143,37 +114,8 @@ export default function CollegeStudents() {
     setUpdating(true);
 
     try {
-      const token = localStorage.getItem("fomo_token");
-      
-      if (!token || !documentId) {
-        console.warn("No token or documentId - updating locally only");
-        // Update local state
-        setStudents((prev) =>
-          prev.map((s) => (s.id === studentId ? { ...s, cgpa } : s))
-        );
-        setEditingCGPA(null);
-        setUpdating(false);
-        return;
-      }
-
-      // Send update to backend
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337"}/api/student-profiles/${documentId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            data: {
-              cgpa: cgpa,
-            },
-          }),
-        }
-      );
-
-      if (!response.ok) {
+      const success = await updateStudentCgpa(studentId, cgpa);
+      if (!success) {
         throw new Error("Failed to update CGPA");
       }
 
@@ -183,7 +125,6 @@ export default function CollegeStudents() {
       );
 
       setEditingCGPA(null);
-      console.log("CGPA updated successfully");
     } catch (error) {
       console.error("Error updating CGPA:", error);
       alert("Failed to update CGPA. Please try again.");
@@ -458,7 +399,7 @@ export default function CollegeStudents() {
                                 disabled={updating}
                               />
                               <button
-                                onClick={() => handleSaveCGPA(student.id, student.documentId)}
+                                onClick={() => handleSaveCGPA(student.id)}
                                 disabled={updating}
                                 className="px-3 py-1 bg-teal-600 text-white text-xs font-medium rounded-md hover:bg-teal-700 transition-colors disabled:opacity-50"
                               >

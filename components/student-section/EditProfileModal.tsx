@@ -2,9 +2,8 @@
 
 import { X, Check } from "lucide-react";
 import { useState } from "react";
-import { getAuthToken } from "@/lib/strapi/auth";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+import { getCurrentAuthUser } from "@/lib/supabase/auth";
+import { upsertStudentProfile } from "@/lib/supabase/profile";
 
 // Predefined options
 const AVAILABLE_SKILLS = [
@@ -116,48 +115,15 @@ export default function EditProfileModal({
     e.preventDefault();
 
     try {
-      const token = getAuthToken();
-      if (!token) {
+      const currentUser = await getCurrentAuthUser();
+      if (!currentUser) {
         alert("You must be signed in to update your profile.");
         return;
       }
 
-      // Get studentId from stored user
-      let studentId: string | null = null;
-      try {
-        const raw = localStorage.getItem("fomo_user");
-        if (raw) {
-          const parsed = JSON.parse(raw as string) as {
-            documentId?: string;
-            id?: string;
-          };
-          studentId = parsed?.documentId ?? parsed?.id ?? null;
-        }
-      } catch {
-        // ignore parse errors
-      }
-
-      // Check for existing profile
-      let recordId: string | null = null;
-      if (studentId) {
-        const q = `${BACKEND_URL}/api/student-profiles?filters[studentId][$eq]=${encodeURIComponent(
-          studentId
-        )}&populate=*`;
-        const res = await fetch(q, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const json = await res.json();
-          const rec = json?.data?.[0];
-          recordId = rec?.documentId ?? null;
-        } else {
-          console.warn("Failed to check existing profile", res.status);
-        }
-      }
-
-      // Build payload for Strapi (do NOT include email to prevent changes)
       const payload: {
         name: string;
+        email: string;
         about: string;
         college: string;
         course: string;
@@ -167,6 +133,7 @@ export default function EditProfileModal({
         interests: string[];
       } = {
         name,
+        email,
         about: bio,
         college: institution,
         course: major,
@@ -176,64 +143,10 @@ export default function EditProfileModal({
         interests: selectedInterests,
       };
 
-      // If record exists, try update. If update returns 404, fallback to create.
-      if (recordId) {
-        console.log({ data: payload });
-        const updateRes = await fetch(
-          `${BACKEND_URL}/api/student-profiles/${recordId}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ data: payload }),
-          }
-        );
-
-        if (!updateRes.ok) {
-          const body = await updateRes.text();
-          console.warn("Update failed", updateRes.status, body);
-          if (updateRes.status === 404) {
-            // fallback to create
-            const createRes = await fetch(
-              `${BACKEND_URL}/api/student-profiles`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ data: { ...payload, studentId } }),
-              }
-            );
-            if (!createRes.ok) {
-              console.error("Create fallback failed", await createRes.text());
-              alert(
-                "Failed to create profile after update failed. See console."
-              );
-              return;
-            }
-          } else {
-            alert("Failed to update profile. See console for details.");
-            return;
-          }
-        }
-      } else {
-        // No record -> create
-        const createRes = await fetch(`${BACKEND_URL}/api/student-profiles`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ data: { ...payload, studentId } }),
-        });
-        if (!createRes.ok) {
-          console.error("Create failed", await createRes.text());
-          alert("Failed to create profile. See console for details.");
-          return;
-        }
+      const result = await upsertStudentProfile(currentUser.id, payload);
+      if (!result) {
+        alert("Failed to save profile. See console for details.");
+        return;
       }
 
       // call parent onSave so UI updates locally (still include email for UI)

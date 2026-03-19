@@ -2,8 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { strapiRegister, setAuthToken } from '@/lib/strapi/auth'
+import { signupWithSupabase } from '@/lib/supabase/auth'
 
 export default function Signup() {
   const [name, setName] = React.useState('')
@@ -12,29 +11,26 @@ export default function Signup() {
   const [error, setError] = React.useState('')
   const [loading, setLoading] = React.useState(false)
   const [success, setSuccess] = React.useState(false)
-  const router = useRouter()
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError('')
     setLoading(true)
     try {
-      const result = await strapiRegister(name || email, email, password)
+      const result = await signupWithSupabase(name || email, email, password, 'college')
       if (result?.error) {
-        setError(result.error.message || 'Registration failed')
-        console.error('Sign up error:', result)
-      } else if (result?.jwt) {
-        // Immediately set token and redirect to profile setup
-        setAuthToken(result.jwt)
-        try {
-          localStorage.setItem('fomo_user', JSON.stringify(result.user))
-        } catch {}
+        setError(result.error || 'Registration failed')
+        console.error('Sign up error:', result.error)
+      } else if (result?.user) {
         setSuccess(true)
-        window.location.href = '/auth/college-profile'
+        if (result?.requiresEmailConfirmation) {
+          setError('Please check your email and confirm your account before logging in.')
+        } else {
+          window.location.href = '/auth/college-profile'
+        }
       } else {
-        // Strapi may require email confirmation depending on settings
         setSuccess(true)
-        setError('Please check your email to confirm your account')
+        setError('Please check your email to confirm your account if verification is enabled')
         console.log('Signup response', result)
       }
     } catch (err) {

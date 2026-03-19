@@ -7,12 +7,11 @@ import Navbar from "@/components/bars/Navbar";
 import {
   getCollegeProfileById,
   updateCollegeProfile,
-} from "@/lib/strapi/profile";
-import { getAuthToken } from "@/lib/strapi/auth";
+} from "@/lib/supabase/profile";
+import { getCurrentAuthUser } from "@/lib/supabase/auth";
 
 type CollegeProfile = {
-  id?: number;
-  documentId?: string;
+  id?: string;
   collegeName: string;
   description: string;
   ranking: string;
@@ -33,21 +32,20 @@ export default function CollegeProfilePage() {
   const [editedProfile, setEditedProfile] = useState<CollegeProfile | null>(
     null
   );
+  const [toast, setToast] = useState<null | { message: string; type: "success" | "error" }>(
+    null
+  );
 
   const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const token = getAuthToken();
-
-      if (!token) {
+      const user = await getCurrentAuthUser();
+      if (!user) {
         router.push("/auth/login");
         return;
       }
 
-      const docId = JSON.parse(
-        localStorage.getItem("fomo_user") || "{}"
-      ).documentId;
-      const data = await getCollegeProfileById(token, docId);
+      const data = await getCollegeProfileById(user.id);
 
       if (data) {
         setProfile(data);
@@ -67,6 +65,13 @@ export default function CollegeProfilePage() {
     loadProfile();
   }, [loadProfile]);
 
+  // auto-dismiss toast
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -84,20 +89,13 @@ export default function CollegeProfilePage() {
   };
 
   const handleSave = async () => {
-    if (!editedProfile || !profile?.documentId) return;
+    if (!editedProfile || !profile?.id) return;
 
     try {
       setSaving(true);
-      const token = getAuthToken();
-
-      if (!token) {
-        alert("Please login first");
-        router.push("/auth/login");
-        return;
-      }
 
       const updated = await updateCollegeProfile(
-        profile.documentId,
+        profile.id,
         {
           collegeName: editedProfile.collegeName,
           description: editedProfile.description,
@@ -105,21 +103,20 @@ export default function CollegeProfilePage() {
           location: editedProfile.location,
           numberOfStudents: editedProfile.numberOfStudents,
           establishmentDate: editedProfile.establishmentDate,
-        },
-        token
+        }
       );
 
       if (updated) {
         setProfile(updated);
         setEditedProfile(updated);
         setEditing(false);
-        alert("Profile updated successfully!");
+        setToast({ message: "Profile updated successfully!", type: "success" });
       } else {
-        alert("Failed to update profile");
+        setToast({ message: "Failed to update profile", type: "error" });
       }
     } catch (error) {
       console.error("Error saving profile:", error);
-      alert("Failed to update profile. Please try again.");
+      setToast({ message: "Failed to update profile. Please try again.", type: "error" });
     } finally {
       setSaving(false);
     }
@@ -217,6 +214,22 @@ export default function CollegeProfilePage() {
       </button>
 
       <main className="sm:ml-56 pt-20 p-4 sm:p-6 lg:p-8">
+        {toast && (
+          <div className="fixed right-4 top-24 z-50 max-w-xs">
+            <div
+              className={`rounded-md px-4 py-2 shadow flex items-center justify-between gap-3 bg-teal-600 text-white`}
+            >
+              <div className="text-sm">{toast.message}</div>
+              <button
+                aria-label="Close"
+                onClick={() => setToast(null)}
+                className="text-lg leading-none px-2 py-0"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-3 sm:gap-4">

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { getAuthToken } from "@/lib/strapi/auth";
-import { getStudentProfile } from "@/lib/strapi/profile";
+import { getCurrentAuthUser } from "@/lib/supabase/auth";
+import { getStudentProfile } from "@/lib/supabase/profile";
 
 /**
  * Hook to check if user has completed their profile
@@ -25,8 +25,8 @@ export function useProfileCheck(redirectIfIncomplete: boolean = true) {
         return;
       }
 
-      const token = getAuthToken();
-      if (!token) {
+      const user = await getCurrentAuthUser();
+      if (!user) {
         // Not authenticated, redirect to login
         if (redirectIfIncomplete) {
           router.push("/auth/login");
@@ -35,17 +35,7 @@ export function useProfileCheck(redirectIfIncomplete: boolean = true) {
         return;
       }
 
-      // Get user ID from localStorage
-      let studentId: string | null = null;
-      try {
-        const userStr = localStorage.getItem("fomo_user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          studentId = user?.documentId || user?.id || null;
-        }
-      } catch (err) {
-        console.error("Failed to parse user data:", err);
-      }
+      const studentId = user.documentId || user.id || null;
 
       if (!studentId) {
         setIsLoading(false);
@@ -57,7 +47,7 @@ export function useProfileCheck(redirectIfIncomplete: boolean = true) {
       }
 
       // Check if profile exists and is complete
-      const profile = await getStudentProfile(studentId, token);
+      const profile = await getStudentProfile(studentId);
 
       const isComplete = !!(
         profile &&
@@ -87,11 +77,10 @@ export function useProfileCheck(redirectIfIncomplete: boolean = true) {
  * Simple function to check if profile exists (non-hook version for server components)
  */
 export async function checkProfileExists(
-  studentId: string,
-  token: string
+  studentId: string
 ): Promise<boolean> {
   try {
-    const profile = await getStudentProfile(studentId, token);
+    const profile = await getStudentProfile(studentId);
     return !!(
       profile &&
       profile.name &&

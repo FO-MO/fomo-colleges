@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { KERALA_COLLEGES } from "@/lib/tools";
+import { getCurrentAuthUser } from "@/lib/supabase/auth";
+import { createCollegeProfile } from "@/lib/supabase/profile";
 
 type CollegeProfile = {
   collegeName: string;
@@ -39,53 +40,36 @@ export default function CollegeProfileSetup() {
     }));
   };
 
-  //sending post req with axios
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       setLoading(true);
-      const token = localStorage.getItem("fomo_token");
-
-      if (!token) {
+      const user = await getCurrentAuthUser();
+      if (!user) {
         alert("Please login first");
         router.push("/auth/login");
         return;
       }
 
-      // Use axios to send POST request to Strapi
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const created = await createCollegeProfile(user.id, {
+        collegeName: profile.collegeName,
+        description: profile.description,
+        ranking: profile.ranking,
+        location: profile.location,
+        numberOfStudents: profile.numberOfStudents,
+        establishmentDate: profile.establishmentDate,
+      });
 
-      const response = await axios.post(
-        `${backendUrl}/api/college-profiles`,
-        {
-          data: {
-            collegeName: profile.collegeName,
-            description: profile.description,
-            ranking: profile.ranking,
-            location: profile.location,
-            numberOfStudents: profile.numberOfStudents,
-            establishmentDate: profile.establishmentDate,
-            userId: JSON.parse(localStorage.getItem("fomo_user") || "{}")
-              .documentId,
-          },
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      // If successful, save college name and navigate to college dashboard
-      if (response.status === 200 || response.status === 201) {
+      if (created) {
         try {
           localStorage.setItem("collegeName", profile.collegeName);
         } catch (e) {
           console.error("Failed to save college name to localStorage:", e);
         }
         router.push("/colleges/dashboard");
+      } else {
+        alert("Failed to create college profile. Please try again.");
       }
     } catch (error) {
       console.error("Error creating college profile:", error);

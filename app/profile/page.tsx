@@ -6,14 +6,11 @@ import ProfileProjectCard from "@/components/student-section/ProfileProjectCard"
 import ProfileClubCard from "@/components/student-section/ProfileClubCard";
 import ProfileInternshipCard from "@/components/student-section/ProfileInternshipCard";
 import EditProfileModal from "@/components/student-section/EditProfileModal";
-import { getAuthToken } from "@/lib/strapi/auth";
+import { getCurrentAuthUser } from "@/lib/supabase/auth";
 import {
-  getStudentProfile,
-  Project,
-  Club,
   Internship,
   getStudentProfile_2,
-} from "@/lib/strapi/profile";
+} from "@/lib/supabase/profile";
 
 type TabKey = "projects" | "clubs" | "internships";
 
@@ -60,8 +57,8 @@ function ProfilePageContent() {
 
   const loadProfile = useCallback(async () => {
     try {
-      const token = getAuthToken();
-      if (!token) {
+      const currentUser = await getCurrentAuthUser();
+      if (!currentUser) {
         router.push("/auth/login");
         return;
       }
@@ -88,7 +85,7 @@ function ProfilePageContent() {
       setIsOwnProfile(userId === currentUserId);
 
       // Transform profile data
-      const data = await getStudentProfile_2(userId, token);
+      const data = await getStudentProfile_2(userId);
       if (!data) {
         setProfileData(null);
         setLoading(false);

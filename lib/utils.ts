@@ -6,19 +6,17 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Get the full image URL for both development and production
- * In development: URL is relative, so prepend BACKEND_URL
- * In production: URL is absolute (from CDN), so use as-is
+ * Get a full image URL when storage paths are relative.
+ * Supabase public URLs are already absolute, so they are returned as-is.
  */
 export function getImageUrl(url: string | undefined | null): string | null {
   if (!url) return null;
 
-  // If URL already starts with http:// or https://, it's absolute (production)
+  // Absolute URL
   if (url.startsWith("http://") || url.startsWith("https://")) {
     return url;
   }
 
-  // Otherwise, it's relative (development), so prepend BACKEND_URL
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "";
-  return `${backendUrl}${url}`;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  return `${supabaseUrl}${url}`;
 }

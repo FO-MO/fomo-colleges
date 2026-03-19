@@ -1,5 +1,8 @@
 # Profile Image Upload Removed
 
+> NOTE: This file refers to Strapi collection fields and upload helpers. Strapi-related backend steps are historical; see SUPABASE_MIGRATION.md for current guidance.
+
+
 ## Summary
 
 All profile picture and background image upload functionality has been removed from the application as requested. You can implement this feature later when ready.

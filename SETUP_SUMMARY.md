@@ -1,5 +1,8 @@
 # Profile Setup Implementation Summary
 
+> NOTE: Strapi backend instructions in this repository are historical. The project now uses Supabase — see SUPABASE_MIGRATION.md for current setup and migration notes.
+
+
 ## What Was Implemented
 
 I've set up a complete profile creation system for your FOMO application that integrates with Strapi. Here's what was built:

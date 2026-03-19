@@ -1,5 +1,8 @@
 # College Profile Page
 
+> NOTE: The Strapi schema examples in this document are historical. The project now uses Supabase — consult SUPABASE_MIGRATION.md for current schema and integration steps.
+
+
 ## Overview
 
 A comprehensive college profile management page that allows colleges to view and edit their institutional information.

@@ -1,12 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CollegesSideBar from "@/components/bars/collegesSideBar";
 import Navbar from "@/components/bars/Navbar";
-import Link from "next/link";
+import { getCurrentAuthUser } from "@/lib/supabase/auth";
+import { getCollegeProfileById, getJobPostingsForCollege } from "@/lib/supabase/profile";
+
+type JobRow = {
+  id: string;
+  title?: string | null;
+  department?: string | null;
+  employer_profile_id?: string | null;
+  description?: string | null;
+  location?: string | null;
+  salary?: number | null;
+  colleges?: unknown | null;
+};
 
 type JobPosting = {
-  id: number;
+  id: string;
   title: string;
   company: string;
   description: string;
@@ -14,28 +26,49 @@ type JobPosting = {
   salary: string;
   applications: number;
   status: "Active" | "Closed" | "Draft";
-  companyLogo: string;
-  logoColor: string;
 };
 
 export default function CollegeJobs() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Job Postings Array
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setLoading(true);
+      const currentUser = await getCurrentAuthUser();
+      if (!currentUser) {
+        setJobPostings([]);
+        setLoading(false);
+        return;
+      }
 
-  // Job postings data (replace with real data when available)
-  const jobPostings: Array<{
-    id?: string;
-    title: string;
-    company?: string;
-    location?: string;
-    salary?: string;
-    status?: string;
-    applications?: number;
-    description?: string;
-    companyLogo?: string;
-    logoColor?: string;
-  }> = [];
+      const collegeProfile = await getCollegeProfileById(currentUser.id);
+      const collegeName = collegeProfile?.collegeName || "";
+      if (!collegeName) {
+        setJobPostings([]);
+        setLoading(false);
+        return;
+      }
+
+      const rows = await getJobPostingsForCollege(collegeName);
+      const mapped = (rows || []).map((r: JobRow) => ({
+        id: r.id,
+        title: r.title || "",
+        company: r.department || r.employer_profile_id || "",
+        description: r.description || "",
+        location: r.location || "",
+        salary: r.salary ? String(r.salary) : "",
+        applications: 0,
+        status: "Active",
+      }));
+
+      setJobPostings(mapped as JobPosting[]);
+      setLoading(false);
+    };
+
+    fetchJobs();
+  }, []);
 
   React.useEffect(() => {
     if (sidebarOpen) {
@@ -151,7 +184,14 @@ export default function CollegeJobs() {
         </div> */}
 
         {/* Job Cards */}
-        {jobPostings.length === 0 ? (
+        {loading ? (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12">
+            <div className="flex flex-col items-center text-center text-gray-600">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600 mb-4"></div>
+              <p className="text-gray-500">Loading job postings...</p>
+            </div>
+          </div>
+        ) : jobPostings.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12">
             <div className="text-center">
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -170,24 +210,15 @@ export default function CollegeJobs() {
                 key={job.id}
                 className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-12 h-12 ${job.logoColor} rounded-lg flex items-center justify-center`}
-                    >
-                      <span className="text-white font-bold text-xl">
-                        {job.companyLogo}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {job.title}
-                      </h3>
-                      <p className="text-sm text-gray-600">{job.company}</p>
-                    </div>
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      {job.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 truncate">{job.company}</p>
                   </div>
                   <span
-                    className={`px-3 py-1 text-xs font-medium rounded-full ${
+                    className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
                       job.status === "Active"
                         ? "bg-green-100 text-green-700"
                         : job.status === "Closed"
@@ -198,18 +229,21 @@ export default function CollegeJobs() {
                     {job.status}
                   </span>
                 </div>
-                <p className="text-gray-600 mb-4">{job.description}</p>
-                <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                  <span>📍 {job.location}</span>
-                  <span>💰 {job.salary}</span>
+                <p className="text-gray-600 text-sm leading-6 mb-4 line-clamp-3">
+                  {job.description || "No description provided."}
+                </p>
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-md text-xs font-medium">
+                    Location: {job.location || "N/A"}
+                  </span>
+                  <span className="px-2.5 py-1 bg-teal-50 text-teal-700 rounded-md text-xs font-medium">
+                    Salary: {job.salary || "N/A"}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">
                     {job.applications} applications
                   </span>
-                  <button className="text-teal-600 hover:text-teal-700 font-medium">
-                    View Details →
-                  </button>
                 </div>
               </div>
             ))}

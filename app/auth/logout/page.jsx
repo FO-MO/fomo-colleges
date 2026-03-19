@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { removeAuthToken } from "@/lib/strapi/auth";
+import { signOutSupabase } from "@/lib/supabase/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -11,10 +11,7 @@ export default function LogoutPage() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    removeAuthToken();
-    try {
-      localStorage.removeItem("fomo_user");
-    } catch {}
+    await signOutSupabase();
 
     // Add a small delay for better UX
     setTimeout(() => {

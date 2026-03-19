@@ -1,5 +1,8 @@
 # Profile Setup Guide
 
+> NOTE: This document references Strapi-based backend integration which is now deprecated in this repository. Use SUPABASE_MIGRATION.md for the current backend integration details.
+
+
 This document explains how to set up the profile system after user signup.
 
 ## Overview

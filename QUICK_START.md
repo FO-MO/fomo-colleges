@@ -1,5 +1,8 @@
 # 🚀 Quick Start Guide - Profile Setup
 
+> NOTE: This guide contains historical Strapi steps. The frontend now integrates with Supabase — see SUPABASE_MIGRATION.md for the updated instructions.
+
+
 ## Prerequisites
 
 - ✅ Strapi backend running on `https://tbs9k5m4-1337.inc1.devtunnels.ms`

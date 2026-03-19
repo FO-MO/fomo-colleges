@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { strapiLogin, setAuthToken } from "@/lib/strapi/auth";
+import { loginWithSupabase } from "@/lib/supabase/auth";
 
 export default function Login() {
   const [email, setEmail] = React.useState("");
@@ -17,16 +17,11 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      const result = await strapiLogin(email, password);
+      const result = await loginWithSupabase(email, password);
       if (result?.error) {
-        setError(result.error.message || "Login failed");
-        console.error("Login error:", result);
-      } else if (result?.jwt) {
-        setAuthToken(result.jwt);
-        try {
-          localStorage.setItem("fomo_user", JSON.stringify(result.user));
-        } catch {}
-        // force full reload to ensure server components pick up cookies if needed
+        setError(result.error || "Login failed");
+        console.error("Login error:", result.error);
+      } else if (result?.user) {
         window.location.href = "/colleges/dashboard";
       } else {
         setError("Unexpected login response");
